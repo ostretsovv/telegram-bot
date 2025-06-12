@@ -1,19 +1,20 @@
-import sqlite3
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from sqlalchemy.orm import sessionmaker, declarative_base
+from config import DATABASE_URL
 
-conn = sqlite3.connect("users.db")
-cursor = conn.cursor()
+engine = create_async_engine(DATABASE_URL, echo=False)
+async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+Base = declarative_base()
 
-cursor.execute("""
-    CREATE TABLE IF NOT EXISTS users (
-        user_id INTEGER PRIMARY KEY
-    )
-""")
-conn.commit()
+# Пример модели
+from sqlalchemy import Column, Integer, BigInteger
 
-def add_user(user_id: int):
-    cursor.execute("INSERT OR IGNORE INTO users (user_id) VALUES (?)", (user_id,))
-    conn.commit()
+class User(Base):
+    __tablename__ = "users"
 
-def get_all_users():
-    cursor.execute("SELECT user_id FROM users")
-    return [row[0] for row in cursor.fetchall()]
+    id = Column(Integer, primary_key=True)
+    telegram_id = Column(BigInteger, unique=True)
+
+async def init_db():
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)

@@ -6,6 +6,9 @@ from aiogram.filters import Command
 from config import BOT_TOKEN, CHANNEL_USERNAME, ADMIN_IDS
 from database import add_user, get_all_users
 from aiogram import Router
+from database import init_db
+
+
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 router = Router()
@@ -68,6 +71,8 @@ async def broadcast_handler(message: types.Message):
 # 🔁 Запуск бота
 async def main():
     await dp.start_polling(bot)
+    await init_db()
+    # запуск диспетчера
 
 if __name__ == "__main__":
     asyncio.run(main())
