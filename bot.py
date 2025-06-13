@@ -7,7 +7,19 @@ from config import BOT_TOKEN, CHANNEL_USERNAME, ADMIN_IDS
 from database import add_user, get_all_users
 from aiogram import Router
 from database import init_db
+from database import init_db  # ← импортируем init_db
 
+bot = Bot(token=BOT_TOKEN)
+dp = Dispatcher()
+
+# Роутеры, middlewares, хендлеры и т.д. подключаются здесь
+async def main():
+    await init_db()  # ← ИНИЦИАЛИЗАЦИЯ БД В САМОМ НАЧАЛЕ
+    await bot.delete_webhook(drop_pending_updates=True)
+    await dp.start_polling(bot)
+
+if __name__ == "__main__":
+    asyncio.run(main())
 
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
@@ -69,10 +81,9 @@ async def broadcast_handler(message: types.Message):
     await message.answer(f"✅ Сообщение отправлено {count} пользователям.")
 
 # 🔁 Запуск бота
-async def main():
-    await dp.start_polling(bot)
-    await init_db()
+#async def main():
+    #await dp.start_polling(bot)
     # запуск диспетчера
 
-if __name__ == "__main__":
-    asyncio.run(main())
+#if __name__ == "__main__":
+    #asyncio.run(main())
