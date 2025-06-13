@@ -4,23 +4,16 @@ from aiogram.enums import ChatMemberStatus
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.filters import Command
 from config import BOT_TOKEN, CHANNEL_USERNAME, ADMIN_IDS
-from database import add_user, get_all_users
+from database import init_db, add_user, get_all_users
 from aiogram import Router
-from database import init_db
-from database import init_db  # ← импортируем init_db
 
-bot = Bot(token=BOT_TOKEN)
-dp = Dispatcher()
-
-# Роутеры, middlewares, хендлеры и т.д. подключаются здесь
+# 🔁 Запуск бота
 async def main():
-    await init_db()  # ← ИНИЦИАЛИЗАЦИЯ БД В САМОМ НАЧАЛЕ
+    await init_db()  # 👈 Инициализация базы
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
 
-if __name__ == "__main__":
-    asyncio.run(main())
-
+# Инициализация
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 router = Router()
@@ -35,14 +28,21 @@ def get_main_keyboard():
 # 📌 Проверка подписки
 async def is_subscribed(user_id: int) -> bool:
     member = await bot.get_chat_member(CHANNEL_USERNAME, user_id)
-    return member.status in [ChatMemberStatus.MEMBER, ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.CREATOR]
+    return member.status in [
+        ChatMemberStatus.MEMBER,
+        ChatMemberStatus.ADMINISTRATOR,
+        ChatMemberStatus.CREATOR,
+    ]
 
 # /start
 @router.message(Command("start"))
 async def start_handler(message: types.Message):
     user_id = message.from_user.id
-    add_user(user_id)
-    text = "👋 Привет! Чтобы забрать шаблон навсегда и использовать его уже сейчас - подпишись на мой канал):"
+    await add_user(user_id)  # 👈 await для async функции
+    text = (
+        "👋 Привет! Чтобы забрать шаблон навсегда и использовать его уже сейчас — "
+        "подпишись на мой канал):"
+    )
     await message.answer(text, reply_markup=get_main_keyboard())
 
 # Проверка подписки по кнопке
@@ -68,9 +68,9 @@ async def broadcast_handler(message: types.Message):
         return await message.answer("❗ Используйте команду: /broadcast ваш_текст")
 
     text_to_send = parts[1]
-    users = get_all_users()
-    count = 0
+    users = await get_all_users()  # 👈 async
 
+    count = 0
     for uid in users:
         try:
             await bot.send_message(uid, text_to_send)
@@ -80,10 +80,7 @@ async def broadcast_handler(message: types.Message):
 
     await message.answer(f"✅ Сообщение отправлено {count} пользователям.")
 
-# 🔁 Запуск бота
-#async def main():
-    #await dp.start_polling(bot)
-    # запуск диспетчера
 
-#if __name__ == "__main__":
-    #asyncio.run(main())
+
+if __name__ == "__main__":
+    asyncio.run(main())
