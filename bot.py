@@ -51,7 +51,7 @@ async def check_subscription(callback: types.CallbackQuery):
     user_id = callback.from_user.id
     if await is_subscribed(user_id):
         await callback.message.edit_text(
-            "✅ Ты подписан! [Вот твой шаблон)](https://docs.google.com/spreadsheets/d/1WZp0CKb8ZNmsyFofwGolaxKaRZE-VmRp37qiUvMP-lg/edit?usp=sharing)",
+            "✅ Ты подписан! [Вот твой шаблон)](https://docs.google.com/spreadsheets/d/1WZp0CKb8ZNmsyFofwGolaxKaRZE-VmRp37qiUvMP-lg/edit?usp=sharing),а здесь[https://t.me/Ostretsovvv/7] еще больше актуальных способов начать зарабатывать в инфобизнесе",
             parse_mode="Markdown"
         )
     else:
